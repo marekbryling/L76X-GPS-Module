@@ -1,29 +1,33 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import serial
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+    USE_GPIO = True
+except ImportError:
+    USE_GPIO = False
 
 Temp = '0123456789ABCDEF*'
-
-
+SERIAL = "/dev/ttyUSB0"
 
 class config(object):
     FORCE  = 17
     STANDBY= 4
     def __init__(ser, Baudrate = 9600):
-        ser.serial = serial.Serial("/dev/ttyS0",Baudrate)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(ser.FORCE, GPIO.IN)
-        GPIO.setup(ser.STANDBY, GPIO.OUT)
-        GPIO.output(ser.STANDBY, GPIO.HIGH)
+        ser.serial = serial.Serial(SERIAL,Baudrate)
+        if USE_GPIO:
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setwarnings(False)
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(ser.FORCE, GPIO.IN)
+            GPIO.setup(ser.STANDBY, GPIO.OUT)
+            GPIO.output(ser.STANDBY, GPIO.HIGH)
         
     def Uart_SendByte(ser, value): 
-        ser.serial.write(value) 
+        ser.serial.write(value.encode()) 
         
     def Uart_SendString(ser, value): 
-        ser.serial.write(value)
+        ser.serial.write(value.encode())
   
 
     def Uart_ReceiveByte(ser): 
@@ -31,10 +35,10 @@ class config(object):
 
     def Uart_ReceiveString(ser, value): 
         data = ser.serial.read(value)
-        return data
+        return data.decode()
         
     def Uart_Set_Baudrate(ser, Baudrate):
-         ser.serial = serial.Serial("/dev/ttyS0",Baudrate)
+         ser.serial = serial.Serial(SERIAL,Baudrate)
 
     
     

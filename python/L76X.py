@@ -1,4 +1,8 @@
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+    USE_GPIO = True
+except ImportError:
+    USE_GPIO = False
 import config
 import math
 import time
@@ -86,17 +90,17 @@ class L76X(object):
         for i in range(2, len(data)):
             Check = Check ^ ord(data[i]) 
         data = data + Temp[16]
-        data = data + Temp[(Check/16)]
-        data = data + Temp[(Check%16)]
+        data = data + Temp[int(Check/16)]
+        data = data + Temp[int(Check%16)]
         self.config.Uart_SendString(data)
         self.config.Uart_SendByte('\r')
         self.config.Uart_SendByte('\n')
-        print data
+        print(data)
         
     def L76X_Gat_GNRMC(self):
         data = self.config.Uart_ReceiveString(BUFFSIZE)
-        print data
-        print '\n'
+        print(data)
+        print('\n')
         add=0
         self.Status = 0
         for i in range(0, BUFFSIZE-71):
@@ -210,13 +214,14 @@ class L76X(object):
         self.config.Uart_Set_Baudrate(Baudrate)
 
     def L76X_Exit_BackupMode(self):
-        GPIO.setup(self.config.FORCE, GPIO.OUT)
-        time.sleep(1)
-        GPIO.output(self.config.FORCE, GPIO.HIGH)
-        time.sleep(1)
-        GPIO.output(self.config.FORCE, GPIO.LOW)
-        time.sleep(1)
-        GPIO.setup(self.config.FORCE, GPIO.IN)
+        if USE_GPIO:
+            GPIO.setup(self.config.FORCE, GPIO.OUT)
+            time.sleep(1)
+            GPIO.output(self.config.FORCE, GPIO.HIGH)
+            time.sleep(1)
+            GPIO.output(self.config.FORCE, GPIO.LOW)
+            time.sleep(1)
+            GPIO.setup(self.config.FORCE, GPIO.IN)
 
 
     
